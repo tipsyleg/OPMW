@@ -26,6 +26,12 @@
       font-size: 1.2rem;
       display: flex;
       align-items: center;
+      transition: background-color 0.3s;
+    }
+    .task.completed {
+      background-color: #d4edda;
+      border-radius: 5px;
+      padding: 5px;
     }
     .counter {
       display: flex;
@@ -62,7 +68,7 @@
     button.reset:hover, button.add:hover {
       background-color: #ddd;
     }
-    .completed {
+    .completed-check {
       color: green;
       font-weight: bold;
       margin-left: 10px;
@@ -110,7 +116,7 @@
       container.innerHTML = '';
       for (const [task, data] of Object.entries(tasks)) {
         const taskDiv = document.createElement('div');
-        taskDiv.className = 'task';
+        taskDiv.className = 'task' + (data.count >= data.goal ? ' completed' : '');
         taskDiv.innerHTML = `
           ${data.goal} ${task}
           <div class="counter">
@@ -118,7 +124,7 @@
             <span id="${task}">${data.count}</span>
             <button onclick="increase('${task}')">+</button>
           </div>
-          <span id="check-${task}" class="completed" style="display: ${data.count >= data.goal ? 'inline' : 'none'}">✔</span>
+          <span id="check-${task}" class="completed-check" style="display: ${data.count >= data.goal ? 'inline' : 'none'}">✔</span>
         `;
         container.appendChild(taskDiv);
       }
