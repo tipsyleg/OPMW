@@ -23,16 +23,33 @@
     .task {
       margin: 10px 0;
       font-size: 1.2rem;
+      display: flex;
+      align-items: center;
     }
-    .task input {
-      margin-right: 10px;
-      transform: scale(1.5);
+    .counter {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+    }
+    .counter button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #fff;
+      border: 2px solid #222;
+      border-radius: 5px;
+    }
+    .counter span {
+      width: 40px;
+      text-align: center;
+      font-weight: bold;
     }
     .streak {
       margin-top: 30px;
       font-size: 1.2rem;
     }
-    button {
+    button.reset {
       margin-top: 20px;
       padding: 10px 20px;
       font-size: 1rem;
@@ -41,7 +58,7 @@
       border: 2px solid #222;
       border-radius: 5px;
     }
-    button:hover {
+    button.reset:hover {
       background-color: #ddd;
     }
   </style>
@@ -51,49 +68,92 @@
   <h1>One Punch Man Workout Tracker</h1>
 
   <div class="task">
-    <input type="checkbox" id="pushups"> 100 Push-ups
+    100 Push-ups
+    <div class="counter">
+      <button onclick="decrease('pushups')">-</button>
+      <span id="pushups">0</span>
+      <button onclick="increase('pushups')">+</button>
+    </div>
   </div>
   <div class="task">
-    <input type="checkbox" id="situps"> 100 Sit-ups
+    100 Sit-ups
+    <div class="counter">
+      <button onclick="decrease('situps')">-</button>
+      <span id="situps">0</span>
+      <button onclick="increase('situps')">+</button>
+    </div>
   </div>
   <div class="task">
-    <input type="checkbox" id="squats"> 100 Squats
+    100 Squats
+    <div class="counter">
+      <button onclick="decrease('squats')">-</button>
+      <span id="squats">0</span>
+      <button onclick="increase('squats')">+</button>
+    </div>
   </div>
   <div class="task">
-    <input type="checkbox" id="run"> 10 km Run
+    10 km Run
+    <div class="counter">
+      <button onclick="decrease('run')">-</button>
+      <span id="run">0</span>
+      <button onclick="increase('run')">+</button>
+    </div>
   </div>
 
   <div class="streak" id="streak">Streak: 0 days</div>
 
-  <button onclick="resetTasks()">Reset for New Day</button>
+  <button class="reset" onclick="resetTasks()">Reset for New Day</button>
 
   <script>
-    const tasks = ['pushups', 'situps', 'squats', 'run'];
+    const tasks = {
+      pushups: 100,
+      situps: 100,
+      squats: 100,
+      run: 10
+    };
 
-    function saveProgress() {
-      tasks.forEach(task => {
-        localStorage.setItem(task, document.getElementById(task).checked);
-      });
+    function increase(task) {
+      let value = parseInt(localStorage.getItem(task) || '0');
+      value++;
+      localStorage.setItem(task, value);
+      document.getElementById(task).innerText = value;
       checkCompletion();
     }
 
+    function decrease(task) {
+      let value = parseInt(localStorage.getItem(task) || '0');
+      if (value > 0) value--;
+      localStorage.setItem(task, value);
+      document.getElementById(task).innerText = value;
+    }
+
+    function saveProgress() {
+      Object.keys(tasks).forEach(task => {
+        localStorage.setItem(task, document.getElementById(task).innerText);
+      });
+    }
+
     function loadProgress() {
-      tasks.forEach(task => {
+      Object.keys(tasks).forEach(task => {
         const value = localStorage.getItem(task);
-        document.getElementById(task).checked = (value === 'true');
+        document.getElementById(task).innerText = value || '0';
       });
     }
 
     function resetTasks() {
-      tasks.forEach(task => {
-        document.getElementById(task).checked = false;
-        localStorage.setItem(task, false);
+      Object.keys(tasks).forEach(task => {
+        localStorage.setItem(task, '0');
+        document.getElementById(task).innerText = '0';
       });
     }
 
     function checkCompletion() {
-      const allComplete = tasks.every(task => document.getElementById(task).checked);
-      if (allComplete) {
+      const completed = Object.keys(tasks).every(task => {
+        const value = parseInt(localStorage.getItem(task) || '0');
+        return value >= tasks[task];
+      });
+
+      if (completed) {
         let streak = parseInt(localStorage.getItem('streak') || '0');
         streak++;
         localStorage.setItem('streak', streak);
@@ -105,10 +165,6 @@
       let streak = parseInt(localStorage.getItem('streak') || '0');
       document.getElementById('streak').innerText = `Streak: ${streak} days`;
     }
-
-    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-      input.addEventListener('change', saveProgress);
-    });
 
     loadProgress();
     loadStreak();
