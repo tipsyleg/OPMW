@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One Punch Man Workout Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .task {
+      margin: 10px 0;
+      font-size: 1.2rem;
+    }
+    .task input {
+      margin-right: 10px;
+      transform: scale(1.5);
+    }
+    .streak {
+      margin-top: 30px;
+      font-size: 1.2rem;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #fff;
+      border: 2px solid #222;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>One Punch Man Workout Tracker</h1>
+
+  <div class="task">
+    <input type="checkbox" id="pushups"> 100 Push-ups
+  </div>
+  <div class="task">
+    <input type="checkbox" id="situps"> 100 Sit-ups
+  </div>
+  <div class="task">
+    <input type="checkbox" id="squats"> 100 Squats
+  </div>
+  <div class="task">
+    <input type="checkbox" id="run"> 10 km Run
+  </div>
+
+  <div class="streak" id="streak">Streak: 0 days</div>
+
+  <button onclick="resetTasks()">Reset for New Day</button>
+
+  <script>
+    const tasks = ['pushups', 'situps', 'squats', 'run'];
+
+    function saveProgress() {
+      tasks.forEach(task => {
+        localStorage.setItem(task, document.getElementById(task).checked);
+      });
+      checkCompletion();
+    }
+
+    function loadProgress() {
+      tasks.forEach(task => {
+        const value = localStorage.getItem(task);
+        document.getElementById(task).checked = (value === 'true');
+      });
+    }
+
+    function resetTasks() {
+      tasks.forEach(task => {
+        document.getElementById(task).checked = false;
+        localStorage.setItem(task, false);
+      });
+    }
+
+    function checkCompletion() {
+      const allComplete = tasks.every(task => document.getElementById(task).checked);
+      if (allComplete) {
+        let streak = parseInt(localStorage.getItem('streak') || '0');
+        streak++;
+        localStorage.setItem('streak', streak);
+        document.getElementById('streak').innerText = `Streak: ${streak} days`;
+      }
+    }
+
+    function loadStreak() {
+      let streak = parseInt(localStorage.getItem('streak') || '0');
+      document.getElementById('streak').innerText = `Streak: ${streak} days`;
+    }
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+      input.addEventListener('change', saveProgress);
+    });
+
+    loadProgress();
+    loadStreak();
+  </script>
+
+</body>
+</html>
