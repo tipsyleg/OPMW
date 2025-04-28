@@ -16,6 +16,7 @@
       min-height: 100vh;
       margin: 0;
       padding: 20px;
+      overflow-x: hidden;
     }
     h1 {
       margin-bottom: 20px;
@@ -85,6 +86,15 @@
       border: 2px solid #222;
       border-radius: 5px;
     }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +112,8 @@
     <input type="number" id="newTaskGoal" placeholder="Goal" required>
     <button class="add" type="submit">Add Task</button>
   </form>
+
+  <canvas id="confetti"></canvas>
 
   <script>
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {
@@ -162,6 +174,7 @@
         streak++;
         localStorage.setItem('streak', streak);
         document.getElementById('streak').innerText = `Streak: ${streak} days`;
+        launchConfetti();
       }
     }
 
@@ -181,6 +194,45 @@
         document.getElementById('newTaskName').value = '';
         document.getElementById('newTaskGoal').value = '';
       }
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = [];
+      for (let i = 0; i < 150; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 8 + 2,
+          speed: Math.random() * 3 + 2,
+          color: `hsl(${Math.random() * 360}, 70%, 60%)`
+        });
+      }
+
+      function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const p of pieces) {
+          p.y += p.speed;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        }
+      }
+
+      let frame = 0;
+      function animate() {
+        update();
+        frame++;
+        if (frame < 100) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
     }
 
     renderTasks();
