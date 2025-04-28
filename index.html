@@ -114,6 +114,7 @@
   </form>
 
   <canvas id="confetti"></canvas>
+  <audio id="chime" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
   <script>
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {
@@ -130,6 +131,7 @@
         const taskDiv = document.createElement('div');
         taskDiv.className = 'task' + (data.count >= data.goal ? ' completed' : '');
         taskDiv.innerHTML = `
+          <input type="checkbox" onchange="toggleComplete('${task}')" ${data.count >= data.goal ? 'checked' : ''}>
           ${data.goal} ${task}
           <div class="counter">
             <button onclick="decrease('${task}')">-</button>
@@ -155,6 +157,17 @@
       renderTasks();
     }
 
+    function toggleComplete(task) {
+      if (tasks[task].count < tasks[task].goal) {
+        tasks[task].count = tasks[task].goal;
+      } else {
+        tasks[task].count = 0;
+      }
+      saveTasks();
+      renderTasks();
+      checkCompletion();
+    }
+
     function saveTasks() {
       localStorage.setItem('tasks', JSON.stringify(tasks));
     }
@@ -175,6 +188,7 @@
         localStorage.setItem('streak', streak);
         document.getElementById('streak').innerText = `Streak: ${streak} days`;
         launchConfetti();
+        playChime();
       }
     }
 
@@ -233,6 +247,11 @@
         }
       }
       animate();
+    }
+
+    function playChime() {
+      const chime = document.getElementById('chime');
+      chime.play();
     }
 
     renderTasks();
