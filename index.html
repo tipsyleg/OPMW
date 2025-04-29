@@ -39,7 +39,7 @@
       align-items: center;
       margin-left: 10px;
     }
-    .counter button {
+    .counter button, .remove-button {
       margin: 0 5px;
       padding: 5px 10px;
       font-size: 1rem;
@@ -66,7 +66,7 @@
       border: 2px solid #222;
       border-radius: 5px;
     }
-    button.reset:hover, button.add:hover {
+    button.reset:hover, button.add:hover, .remove-button:hover {
       background-color: #ddd;
     }
     .completed-check {
@@ -137,6 +137,7 @@
             <button onclick="decrease('${task}')">-</button>
             <span id="${task}">${data.count}</span>
             <button onclick="increase('${task}')">+</button>
+            <button class="remove-button" onclick="removeTask('${task}')">✖</button>
           </div>
           <span id="check-${task}" class="completed-check" style="display: ${data.count >= data.goal ? 'inline' : 'none'}">✔</span>
         `;
@@ -166,6 +167,12 @@
       saveTasks();
       renderTasks();
       checkCompletion();
+    }
+
+    function removeTask(task) {
+      delete tasks[task];
+      saveTasks();
+      renderTasks();
     }
 
     function saveTasks() {
