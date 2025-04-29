@@ -57,7 +57,7 @@
       margin-top: 30px;
       font-size: 1.2rem;
     }
-    button.reset, button.add {
+    button.reset, button.add, button.clear-streak {
       margin-top: 20px;
       padding: 10px 20px;
       font-size: 1rem;
@@ -66,7 +66,7 @@
       border: 2px solid #222;
       border-radius: 5px;
     }
-    button.reset:hover, button.add:hover, .remove-button:hover {
+    button.reset:hover, button.add:hover, button.clear-streak:hover, .remove-button:hover {
       background-color: #ddd;
     }
     .completed-check {
@@ -106,6 +106,7 @@
   <div class="streak" id="streak">Streak: 0 days</div>
 
   <button class="reset" onclick="resetTasks()">Reset for New Day</button>
+  <button class="clear-streak" onclick="clearStreak()">Clear Streak</button>
 
   <form onsubmit="addTask(event)">
     <input type="text" id="newTaskName" placeholder="Exercise Name" required>
@@ -185,6 +186,11 @@
       }
       saveTasks();
       renderTasks();
+    }
+
+    function clearStreak() {
+      localStorage.setItem('streak', '0');
+      document.getElementById('streak').innerText = 'Streak: 0 days';
     }
 
     function checkCompletion() {
