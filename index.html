@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #72963d;
+      background-color: #f0f0f0;
       color: #222;
       display: flex;
       flex-direction: column;
@@ -118,7 +118,157 @@
   <audio id="chime" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
   <script>
-    // JavaScript content remains unchanged
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || {
+      pushups: { goal: 100, count: 0 },
+      situps: { goal: 100, count: 0 },
+      squats: { goal: 100, count: 0 },
+      run: { goal: 10, count: 0 }
+    };
+
+    function renderTasks() {
+      const container = document.getElementById('tasksContainer');
+      container.innerHTML = '';
+      for (const [task, data] of Object.entries(tasks)) {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task' + (data.count >= data.goal ? ' completed' : '');
+        taskDiv.innerHTML = `
+          <input type="checkbox" onchange="toggleComplete('${task}')" ${data.count >= data.goal ? 'checked' : ''}>
+          ${data.goal} ${task}
+          <div class="counter">
+            <button onclick="decrease('${task}')">-</button>
+            <span id="${task}">${data.count}</span>
+            <button onclick="increase('${task}')">+</button>
+            <button class="remove-button" onclick="removeTask('${task}')">✖</button>
+          </div>
+          <span id="check-${task}" class="completed-check" style="display: ${data.count >= data.goal ? 'inline' : 'none'}">✔</span>
+        `;
+        container.appendChild(taskDiv);
+      }
+    }
+
+    function increase(task) {
+      tasks[task].count++;
+      saveTasks();
+      renderTasks();
+      checkCompletion();
+    }
+
+    function decrease(task) {
+      if (tasks[task].count > 0) tasks[task].count--;
+      saveTasks();
+      renderTasks();
+    }
+
+    function toggleComplete(task) {
+      if (tasks[task].count < tasks[task].goal) {
+        tasks[task].count = tasks[task].goal;
+      } else {
+        tasks[task].count = 0;
+      }
+      saveTasks();
+      renderTasks();
+      checkCompletion();
+    }
+
+    function removeTask(task) {
+      delete tasks[task];
+      saveTasks();
+      renderTasks();
+    }
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function resetTasks() {
+      for (const task in tasks) {
+        tasks[task].count = 0;
+      }
+      saveTasks();
+      renderTasks();
+    }
+
+    function clearStreak() {
+      localStorage.setItem('streak', '0');
+      document.getElementById('streak').innerText = 'Streak: 0 days';
+    }
+
+    function checkCompletion() {
+      const completed = Object.values(tasks).every(task => task.count >= task.goal);
+      if (completed) {
+        let streak = parseInt(localStorage.getItem('streak') || '0');
+        streak++;
+        localStorage.setItem('streak', streak);
+        document.getElementById('streak').innerText = `Streak: ${streak} days`;
+        launchConfetti();
+        playChime();
+      }
+    }
+
+    function loadStreak() {
+      let streak = parseInt(localStorage.getItem('streak') || '0');
+      document.getElementById('streak').innerText = `Streak: ${streak} days`;
+    }
+
+    function addTask(event) {
+      event.preventDefault();
+      const name = document.getElementById('newTaskName').value.trim();
+      const goal = parseInt(document.getElementById('newTaskGoal').value);
+      if (name && goal > 0) {
+        tasks[name.toLowerCase().replace(/\s+/g, '_')] = { goal, count: 0 };
+        saveTasks();
+        renderTasks();
+        document.getElementById('newTaskName').value = '';
+        document.getElementById('newTaskGoal').value = '';
+      }
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = [];
+      for (let i = 0; i < 150; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 8 + 2,
+          speed: Math.random() * 3 + 2,
+          color: `hsl(${Math.random() * 360}, 70%, 60%)`
+        });
+      }
+
+      function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const p of pieces) {
+          p.y += p.speed;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        }
+      }
+
+      let frame = 0;
+      function animate() {
+        update();
+        frame++;
+        if (frame < 100) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+
+    function playChime() {
+      const chime = document.getElementById('chime');
+      chime.play();
+    }
+
+    renderTasks();
+    loadStreak();
   </script>
 
 </body>
