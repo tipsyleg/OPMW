@@ -115,7 +115,6 @@
   </form>
 
   <canvas id="confetti"></canvas>
-  <audio id="chime" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
   <script>
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {
@@ -201,7 +200,6 @@
         localStorage.setItem('streak', streak);
         document.getElementById('streak').innerText = `Streak: ${streak} days`;
         launchConfetti();
-        playChime();
       }
     }
 
@@ -230,7 +228,7 @@
       canvas.height = window.innerHeight;
 
       const pieces = [];
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 1000; i++) {
         pieces.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height - canvas.height,
@@ -243,28 +241,20 @@
       function update() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (const p of pieces) {
-          p.y += p.speed;
+          if (p.y < canvas.height - p.size) {
+            p.y += p.speed;
+          }
           ctx.fillStyle = p.color;
-          ctx.fillRect(p.x, p.y, p.size, p.size);
+          ctx.fillRect(p.x, Math.min(p.y, canvas.height - p.size), p.size, p.size);
         }
       }
 
-      let frame = 0;
       function animate() {
         update();
-        frame++;
-        if (frame < 100) {
-          requestAnimationFrame(animate);
-        } else {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+        requestAnimationFrame(animate);
       }
-      animate();
-    }
 
-    function playChime() {
-      const chime = document.getElementById('chime');
-      chime.play();
+      animate();
     }
 
     renderTasks();
